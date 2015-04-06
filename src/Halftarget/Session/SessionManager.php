@@ -1,8 +1,9 @@
 <?php namespace Halftarget\Session;
 
-use Illuminate\Session\SessionManager;
+use Illuminate\Session\Store;
+use Illuminate\Session\EncryptedStore;
 
-class SessionManager extends Illuminate\Session\SessionManager {
+class SessionManager extends \Illuminate\Session\SessionManager {
 
     /**
      * Build the session instance.
@@ -12,6 +13,10 @@ class SessionManager extends Illuminate\Session\SessionManager {
      */
     protected function buildSession($handler)
     {
+        if( !isset($this->app['config']['session.header']) ){
+            throw new \Exception("Session header name must be configured");
+        }
+
         if ($this->app['config']['session.encrypt'])
         {
             return new EncryptedStore(
