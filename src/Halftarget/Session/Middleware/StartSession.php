@@ -4,13 +4,10 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Session\SessionManager;
 use Illuminate\Session\SessionInterface;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Contracts\Routing\TerminableMiddleware;
 
 class StartSession implements TerminableMiddleware {
-
-    const HEADER_TOKEN_NAME = 'x-halftarget-laravel-token';
 
     /**
      * The session manager.
@@ -62,14 +59,14 @@ class StartSession implements TerminableMiddleware {
 
         // Again, if the session has been configured we will need to close out the session
         // so that the attributes may be persisted to some storage medium. We will also
-        // add the session identifier cookie to the application response headers now.
+        // add the session identifier header to the application response headers now.
         if ($this->sessionConfigured())
         {
             $this->storeCurrentUrl($request, $session);
 
             $this->collectGarbage($session);
 
-            $this->addCookieToResponse($response, $session);
+            $this->addHeaderToResponse($response, $session);
         }
 
         return $response;
@@ -115,9 +112,7 @@ class StartSession implements TerminableMiddleware {
     {
         $session = $this->manager->driver();
 
-        //$session->setId($request->cookies->get($session->getName()));
-
-        $session->setId( $request->headers->get( self::HEADER_TOKEN_NAME ) );
+        $session->setId( $request->headers->get($session->getName()) );
 
         return $session;
     }
@@ -168,17 +163,17 @@ class StartSession implements TerminableMiddleware {
     }
 
     /**
-     * Add the session cookie to the application response.
+     * Add the session header to the application response.
      *
      * @param  \Symfony\Component\HttpFoundation\Response  $response
      * @param  \Illuminate\Session\SessionInterface  $session
      * @return void
      */
-    protected function addCookieToResponse(Response $response, SessionInterface $session)
+    protected function addHeaderToResponse(Response $response, SessionInterface $session)
     {
         if ($this->sessionIsPersistent($config = $this->manager->getSessionConfig()))
         {
-            $response->headers->set(self::HEADER_TOKEN_NAME, $session->getId());
+            $response->headers->set($session->getName(), $session->getId());
 
         }
     }
