@@ -1,7 +1,6 @@
 <?php namespace  Halftarget\Session;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Session\SessionManager;
 
 class SessionServiceProvider extends ServiceProvider {
 
